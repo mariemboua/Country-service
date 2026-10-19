@@ -7,37 +7,56 @@ pipeline {
     }
 
     stages {
-        stage('Checkout') {
+        stage('Checkout code') {
             steps {
-                echo 'Code source recupere depuis GitHub'
+                checkout scm
             }
         }
 
-        stage('Compilation') {
+        stage('Compile code') {
             steps {
-                sh 'mvn clean compile'
+                sh 'mvn -B clean compile'
             }
         }
 
-        stage('Tests') {
+        stage('Test code') {
             steps {
-                sh 'mvn test'
+                sh 'mvn -B test'
+            }
+            post {
+                always {
+                    junit allowEmptyResults: true,
+                          testResults: '**/target/surefire-reports/TEST-*.xml'
+                }
             }
         }
 
-        stage('Package') {
+        stage('Package code') {
             steps {
-                sh 'mvn package -DskipTests'
+                sh 'mvn -B package'
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('MySonarQubeServer') {
+                    sh '''
+                        mvn -B sonar:sonar \
+                          -Dsonar.projectKey=country-service \
+                          -Dsonar.projectName=country-service
+                    '''
+                }
             }
         }
     }
 
     post {
         success {
-            echo 'Pipeline termine avec succes !'
+            echo 'Build, tests, package et analyse SonarQube termines.'
         }
         failure {
-            echo 'Le pipeline a echoue. Consulter la console Jenkins.'
+            echo 'Pipeline en echec : consulter Console Output.'
         }
     }
 }
+
