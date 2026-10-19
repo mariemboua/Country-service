@@ -37,17 +37,18 @@ pipeline {
             }
         }
 
+        
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('MySonarQubeServer') {
                     sh '''
-                        mvn -B sonar:sonar \
-                          -Dsonar.projectKey=country-service \
-                          -Dsonar.projectName=country-service
+                    mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+                    -Dsonar.projectKey=country-service \
+                    -Dsonar.projectName=country-service
                     '''
-                }
-            }
-        }
+                 }
+              }
+         }
     }
 
     post {
