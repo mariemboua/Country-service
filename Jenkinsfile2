@@ -16,18 +16,18 @@ pipeline {
         }
         stage('Build Dockerfile') {
             steps {
-                sh 'docker build -t my-compte-service:$BUILD_NUMBER .'
+                sh 'docker build -t my-country-service:$BUILD_NUMBER .'
                 withCredentials([string(credentialsId: 'dockerhub-pwd', variable: 'dockerhubpwd')]) {
                     sh 'docker login -u mariembouaz -p ${dockerhubpwd}'
                 }
-                sh 'docker tag my-compte-service:$BUILD_NUMBER mariembouaz/my-country-service:$BUILD_NUMBER'
-                sh 'docker push mariembouaz/my-compte-service:$BUILD_NUMBER'
+                sh 'docker tag my-country-service:$BUILD_NUMBER mariembouaz/my-country-service:$BUILD_NUMBER'
+                sh 'docker push mariembouaz/my-country-service:$BUILD_NUMBER'
             }
         }
         stage('Deploy micro-service') {
             steps {
                 sh 'docker rm -f $(docker ps -aq)'
-                sh 'docker run -d -p 8082:8082 my-compte-service:$BUILD_NUMBER'
+                sh 'docker run -d -p 8082:8082 my-country-service:$BUILD_NUMBER'
             }
         }
     }
