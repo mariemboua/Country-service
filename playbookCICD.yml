@@ -2,39 +2,40 @@
 - name: Build and Deploy Docker Image to Kubernetes
   hosts: localhost
   connection: local
-  vars_files:
-    - vault.yml 
+
   vars:
     image_name: my-country-service
     image_tag: v1
     dockerfile_path: './'
+    docker_registry_username: mariembouaz
+    docker_registry_password: fcXSA!/7qt%Bvtt
 
   tasks:
   - name: Log in to Docker Hub
     community.docker.docker_login:
-      username: "{{ dockerhub_username }}"
-      password: "{{ dockerhub_password }}"
+      username: "{{ docker_registry_username }}"
+      password: "{{ docker_registry_password }}"
       reauthorize: yes
 
   - name: Build Docker image
     community.docker.docker_image:
       build:
         path: "{{ dockerfile_path }}"
-      name: "{{ dockerhub_username }}/{{ image_name }}:{{ image_tag }}"
+      name: "{{ docker_registry_username }}/{{ image_name }}:{{ image_tag }}"
       source: build
       state: present
       tag: "{{ image_tag }}"
       
   - name: Push the Docker image to Docker Hub
     community.docker.docker_image:
-      name: "{{ dockerhub_username }}/{{ image_name }}:{{ image_tag }}"
+      name: "{{ docker_registry_username }}/{{ image_name }}:{{ image_tag }}"
       tag: "{{ image_tag }}"
       push: yes
       source: local
 
   - name: Pull Docker image 
     community.docker.docker_image:
-      name: "{{ dockerhub_username }}/{{ image_name }}:{{ image_tag }}"
+      name: "{{ docker_registry_username }}/{{ image_name }}:{{ image_tag }}"
       tag: "{{ image_tag }}"
       source: pull
 
