@@ -6,7 +6,7 @@
     - vault.yml 
   vars:
     image_name: my-country-service
-    image_tag: 5
+    image_tag: v1
     dockerfile_path: './'
 
   tasks:
