@@ -51,10 +51,13 @@ pipeline {
 
         stage('Build, push & deploy (Ansible)') {
             steps {
-                withCredentials([file(credentialsId: 'ansible-vault-pass', variable: 'VAULT_FILE')]) {
+                withCredentials([string(credentialsId: 'ansible-vault-pass', variable: 'VAULT_PASS')]) {
                     sh '''
+                    trap 'rm -f .vault_pass.tmp' EXIT
+                    echo "$VAULT_PASS" > .vault_pass.tmp
+                    chmod 600 .vault_pass.tmp
                     ansible-playbook playbookCICD.yml \
-                      --vault-password-file $VAULT_FILE \
+                      --vault-password-file .vault_pass.tmp \
                       --extra-vars "image_tag=$BUILD_NUMBER"
                     '''
                 }
