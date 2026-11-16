@@ -33,11 +33,10 @@ pipeline {
 
         stage('Package code') {
             steps {
-                sh 'mvn -B package'
+                sh 'mvn -B package -DskipTests'
             }
         }
 
-        
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('MySonarQubeServer') {
@@ -46,14 +45,26 @@ pipeline {
                     -Dsonar.projectKey=country-service \
                     -Dsonar.projectName=country-service
                     '''
-                 }
-              }
-         }
+                }
+            }
+        }
+
+        stage('Build, push & deploy (Ansible)') {
+            steps {
+                withCredentials([file(credentialsId: 'ansible-vault-pass', variable: 'VAULT_FILE')]) {
+                    sh '''
+                    ansible-playbook playbookCICD.yml \
+                      --vault-password-file $VAULT_FILE \
+                      --extra-vars "image_tag=$BUILD_NUMBER"
+                    '''
+                }
+            }
+        }
     }
 
     post {
         success {
-            echo 'Build, tests, package et analyse SonarQube termines.'
+            echo 'Pipeline complet termine : build, tests, SonarQube, Docker, deploiement.'
         }
         failure {
             echo 'Pipeline en echec : consulter Console Output.'

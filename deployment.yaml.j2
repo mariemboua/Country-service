@@ -14,6 +14,6 @@ spec:
     spec:
       containers:
         - name: country-service-container
-          image: mariembouaz/my-country-service:5
+          image: "{{ dockerhub_username }}/{{ image_name }}:{{ image_tag }}"
           ports:
             - containerPort: 8082
